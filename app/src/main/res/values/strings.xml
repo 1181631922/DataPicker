@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">DataPicker</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_main">MainActivity</string>
+
+    <string name="lunar">农历</string>
+    <string name="cancel">取消</string>
+    <string name="ok">确定</string>
+    <string name="exit">退出</string>
+    <string name="select">选择</string>
+    <string name="error_wrong_birthday">生日不能选择未来的日子</string>
+</resources>
