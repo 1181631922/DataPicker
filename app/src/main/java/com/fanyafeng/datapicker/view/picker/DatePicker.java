@@ -16,6 +16,7 @@ import com.fanyafeng.datapicker.R;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -25,6 +26,8 @@ public class DatePicker extends Dialog {
     private WheelView wv_year;
     private WheelView wv_month;
     private WheelView wv_day;
+
+    private boolean isStillNow = false;
 
     private static int START_YEAR = 1901, END_YEAR = 2048;
     private boolean mSolar;
@@ -50,6 +53,31 @@ public class DatePicker extends Dialog {
     public DatePicker setOnAbortPickerListener(OnAbortPickerListener l) {
         this.mOnAbortListener = l;
         return this;
+    }
+
+    /**
+     * 最终日期是否是今天
+     *
+     * @param context
+     * @param solar
+     * @param year
+     * @param month
+     * @param day
+     * @param isStillNow
+     */
+    public DatePicker(Context context, boolean solar, int year, int month, int day, boolean isStillNow) {
+        super(context);
+        this.mYearShow = true;
+        this.isStillNow = isStillNow;
+        if (isStillNow) {
+            END_YEAR = Calendar.getInstance().get(Calendar.YEAR);
+        } else {
+            END_YEAR = 2048;
+        }
+        init(solar, year, month, day);
+
+        findViewById(R.id.lunar_select_layout).setVisibility(View.GONE);
+        findViewById(R.id.year_select_layout).setVisibility(View.GONE);
     }
 
     public DatePicker(Context context, boolean solar, int year, int month, int day) {
@@ -289,9 +317,21 @@ public class DatePicker extends Dialog {
                     wv_month.setAdapter(new ArrayWheelAdapter<String>(getLunarMonthArray(year_num)));
                     wv_day.setAdapter(new ArrayWheelAdapter<String>(getLunarDayArray(year_num, wv_month.getCurrentItem() + 1)));
                 }
+
+                // TODO: 是否截止到今日
+                if (mSolar && isStillNow && year_num == END_YEAR) {
+                    wv_month.setAdapter(new NumericWheelAdapter(1, Calendar.getInstance().get(Calendar.MONTH)));
+                    wv_month.setCurrentItem(wv_month.getAdapter().getItemsCount() - 1, true);
+                } else if (!mSolar && isStillNow && year_num == END_YEAR) {
+                    // TODO: 17/9/18
+                    wv_month.setAdapter(new ArrayWheelAdapter<String>(getLunarMonthArrayIsStillNow(year_num, Calendar.getInstance().get(Calendar.MONTH) - 1)));
+                    wv_day.setAdapter(new ArrayWheelAdapter<String>(getLunarDayArrayIsStillNow()));
+                }
+
                 if (wv_month.getCurrentItem() >= wv_month.getAdapter().getItemsCount()) {
                     wv_month.setCurrentItem(wv_month.getAdapter().getItemsCount() - 1, true);
                 }
+
                 if (wv_day.getCurrentItem() >= wv_day.getAdapter().getItemsCount()) {
                     wv_day.setCurrentItem(wv_day.getAdapter().getItemsCount() - 1, true);
                 }
@@ -318,9 +358,18 @@ public class DatePicker extends Dialog {
                 } else {
                     wv_day.setAdapter(new ArrayWheelAdapter<String>(getLunarDayArray(wv_year.getCurrentItem() + START_YEAR, month_num)));
                 }
+
+                // TODO: 是否截止到今日
+                if (mSolar && isStillNow && month_num == Calendar.getInstance().get(Calendar.MONTH)) {
+                    wv_day.setAdapter(new NumericWheelAdapter(1, Calendar.getInstance().get(Calendar.DAY_OF_MONTH)));
+                } else if (!mSolar && isStillNow && month_num == Calendar.getInstance().get(Calendar.MONTH)) {
+                    wv_day.setAdapter(new ArrayWheelAdapter<String>(getLunarDayArrayIsStillNow()));
+                }
+
                 if (wv_day.getCurrentItem() >= wv_day.getAdapter().getItemsCount()) {
                     wv_day.setCurrentItem(wv_day.getAdapter().getItemsCount() - 1, true);
                 }
+
                 updateDayLabel();
             }
         };
@@ -366,11 +415,73 @@ public class DatePicker extends Dialog {
         return result;
     }
 
+    private String[] getLunarMonthArrayIsStillNow(int year, int month) {
+        List<String> list = new ArrayList<String>();
+
+        int leapMonth = LunarItem.leapMonth(year);
+        if (!mYearShow) {
+            leapMonth = 0;
+        }
+
+        int count = 1;
+        String lunarMonth = LunarItem.getChinaMonthString(month, false);
+        if (lunarMonth.contains("正")) {
+            count = 1;
+        } else if (lunarMonth.contains("二")) {
+            count = 2;
+        } else if (lunarMonth.contains("三")) {
+            count = 3;
+        } else if (lunarMonth.contains("四")) {
+            count = 4;
+        } else if (lunarMonth.contains("五")) {
+            count = 5;
+        } else if (lunarMonth.contains("六")) {
+            count = 6;
+        } else if (lunarMonth.contains("七")) {
+            count = 7;
+        } else if (lunarMonth.contains("八")) {
+            count = 8;
+        } else if (lunarMonth.contains("九")) {
+            count = 9;
+        } else if (lunarMonth.contains("十")) {
+            count = 10;
+        } else if (lunarMonth.contains("冬")) {
+            count = 11;
+        } else if (lunarMonth.contains("腊")) {
+            count = 12;
+        }
+
+        for (int i = 1; i <= count; i++) {
+            list.add(LunarItem.getChinaMonthString(i, false).replaceAll("月", ""));
+            if (mLeapMonthShow && i == leapMonth) {
+                list.add(LunarItem.getChinaMonthString(i, true).replaceAll("月", ""));
+            }
+        }
+        String[] result = new String[list.size()];
+        list.toArray(result);
+        return result;
+    }
+
     private String[] getLunarDayArray(int year, int month) {
         List<String> list = new ArrayList<String>();
         for (int i = 1; i <= LunarItem.getMonthDays(year, month); i++) {
             list.add(LunarItem.getChinaDayString(i));
         }
+        String[] result = new String[list.size()];
+        list.toArray(result);
+        return result;
+    }
+
+    private String[] getLunarDayArrayIsStillNow() {
+        List<String> list = new ArrayList<String>();
+
+        Calendar cal = Calendar.getInstance();
+        LunarItem lunarItem = new LunarItem(cal);
+
+        for (int i = 1; i <= lunarItem.getDay(); i++) {
+            list.add(LunarItem.getChinaDayString(i));
+        }
+        // TODO: 17/9/18
         String[] result = new String[list.size()];
         list.toArray(result);
         return result;

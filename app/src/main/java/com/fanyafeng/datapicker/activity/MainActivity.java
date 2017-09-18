@@ -47,6 +47,10 @@ public class MainActivity extends BaseActivity {
         btnDataPicker = (Button) findViewById(R.id.btnDataPicker);
         btnDataPicker.setOnClickListener(this);
         tvDataPicker = (TextView) findViewById(R.id.tvDataPicker);
+
+        Calendar calendar = Calendar.getInstance();
+        int nowYear = calendar.get(Calendar.YEAR);
+        tvDataPicker.setText("今年：" + nowYear);
     }
 
     //初始化数据
@@ -60,13 +64,22 @@ public class MainActivity extends BaseActivity {
         switch (v.getId()) {
             case R.id.btnDataPicker:
                 Calendar now = Calendar.getInstance();
-                now.set(Calendar.YEAR, 1985);
+                now.set(Calendar.YEAR, 2016);
 
-                new DatePicker(MainActivity.this, true, now.get(Calendar.YEAR), now.get(Calendar.MONTH), now.get(Calendar.DATE))
+//                DatePicker datePicker = new DatePicker(MainActivity.this, true, now.get(Calendar.YEAR), now.get(Calendar.MONTH), now.get(Calendar.DATE), false)
+//                        .setOnDateTimeSetListener(new DatePicker.OnDateTimeSetListener() {
+//                            @Override
+//                            public void onDateTimeSet(DatePicker picker) {
+//                                birthdayTime = picker.getTime();
+//                                tvDataPicker.setText(formatter.format(birthdayTime.getTime()));
+//                            }
+//                        });
+//                datePicker.show();
+
+                new DatePicker(MainActivity.this, false, now.get(Calendar.YEAR), now.get(Calendar.MONTH), now.get(Calendar.DATE), true)
                         .setOnDateTimeSetListener(new DatePicker.OnDateTimeSetListener() {
                             @Override
                             public void onDateTimeSet(DatePicker picker) {
-
                                 birthdayTime = picker.getTime();
                                 tvDataPicker.setText(formatter.format(birthdayTime.getTime()));
                             }
