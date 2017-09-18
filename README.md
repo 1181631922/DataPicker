@@ -25,7 +25,7 @@ Calendar now = Calendar.getInstance();
 # update 添加新方法，日期选择器的最后的时间是否为今天
 
 # 项目运行效果图
-![项目运行效果](https://github.com/1181631922/DataPicker/blob/master/ScreenShots/datapicker_1.gif)
+![项目运行效果](https://github.com/1181631922/DataPicker/blob/master/ScreenShots/datepicker_1.gif)
 
 # 示例代码：
 ```
